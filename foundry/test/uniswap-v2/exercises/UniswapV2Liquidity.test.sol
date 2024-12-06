@@ -4,16 +4,9 @@ pragma solidity 0.8.24;
 import {Test, console2} from "forge-std/Test.sol";
 import {IERC20} from "../../../src/interfaces/IERC20.sol";
 import {IWETH} from "../../../src/interfaces/IWETH.sol";
-import {IUniswapV2Router02} from
-    "../../../src/interfaces/uniswap-v2/IUniswapV2Router02.sol";
-import {IUniswapV2Pair} from
-    "../../../src/interfaces/uniswap-v2/IUniswapV2Pair.sol";
-import {
-    DAI,
-    WETH,
-    UNISWAP_V2_ROUTER_02,
-    UNISWAP_V2_PAIR_DAI_WETH
-} from "../../../src/Constants.sol";
+import {IUniswapV2Router02} from "../../../src/interfaces/uniswap-v2/IUniswapV2Router02.sol";
+import {IUniswapV2Pair} from "../../../src/interfaces/uniswap-v2/IUniswapV2Pair.sol";
+import {DAI, WETH, UNISWAP_V2_ROUTER_02, UNISWAP_V2_PAIR_DAI_WETH} from "../../../src/Constants.sol";
 
 contract UniswapV2LiquidityTest is Test {
     IWETH private constant weth = IWETH(WETH);
@@ -47,12 +40,27 @@ contract UniswapV2LiquidityTest is Test {
         // Don’t change any other code
         vm.prank(user);
 
+        (uint amountA, uint amountB, uint liquidity) = router.addLiquidity({
+            tokenA: DAI,
+            tokenB: WETH,
+            amountADesired: 1e6 * 1e18,
+            amountBDesired: 100 * 1e18,
+            amountAMin: 1,
+            amountBMin: 1,
+            to: user,
+            deadline: block.timestamp
+        });
+
+        console2.log("DAI", amountA);
+        console2.log("WETH", amountB);
+        console2.log("LP", liquidity);
+
         assertGt(pair.balanceOf(user), 0, "LP = 0");
     }
 
     function test_removeLiquidity() public {
         vm.startPrank(user);
-        (,, uint256 liquidity) = router.addLiquidity({
+        (, , uint256 liquidity) = router.addLiquidity({
             tokenA: DAI,
             tokenB: WETH,
             amountADesired: 1000000 * 1e18,
@@ -67,8 +75,20 @@ contract UniswapV2LiquidityTest is Test {
         // Exercise - Remove liquidity from DAI / WETH pool
         // Write your code here
         // Don’t change any other code
+        (uint amountA, uint amountB) = router.removeLiquidity({
+            tokenA: DAI,
+            tokenB: WETH,
+            liquidity: liquidity,
+            amountAMin: 1,
+            amountBMin: 1,
+            to: user,
+            deadline: block.timestamp
+        });
 
         vm.stopPrank();
+
+        console2.log("DAI", amountA);
+        console2.log("WETH", amountB);
 
         assertEq(pair.balanceOf(user), 0, "LP = 0");
     }

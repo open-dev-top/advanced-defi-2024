@@ -46,6 +46,20 @@ contract UniswapV2LiquidityTest is Test {
         // Write your code here
         // Don’t change any other code
         vm.prank(user);
+        (uint256 amountA, uint256 amountB, uint256 liquidity) = router.addLiquidity({
+            tokenA: DAI,
+            tokenB: WETH,
+            amountADesired: 1000000 * 1e18,
+            amountBDesired: 100 * 1e18,
+            amountAMin: 1,
+            amountBMin: 1,
+            to: user,
+            deadline: block.timestamp
+        });
+
+        console2.log("DAI", amountA);
+        console2.log("WETH", amountB);
+        console2.log("Liquidity", liquidity);
 
         assertGt(pair.balanceOf(user), 0, "LP = 0");
     }
